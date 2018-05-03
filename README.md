@@ -2,6 +2,9 @@
 A non-blocking TCP server
 一个非阻塞的 TCP 服务器
 
+Install
+
+go get -u github.com/naxiemolv/wytcp
 
 每一个连接拥有三个goroutine
 
