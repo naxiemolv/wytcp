@@ -1,7 +1,7 @@
 package main
 
 import (
-	"wytcp"
+	"github.com/naxiemolv/wytcp"
 	"fmt"
 
 	"io"
@@ -14,7 +14,7 @@ func main() {
 	cfg := &wytcp.Conf{
 		Port:         8888,
 		SendChanSize: 20,
-		RecvChanSize: 20,
+		ReceiveChanSize: 20,
 	}
 	s, err := wytcp.CreateTCPServer(cfg, &Callback{}, &Protocol{})
 	if err != nil {
