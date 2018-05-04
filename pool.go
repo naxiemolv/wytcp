@@ -30,7 +30,7 @@ func GetConnPool() *ConnPool {
 	return pool
 }
 
-func JoinConn(key interface{}, c *Conn) bool {
+func (pool *ConnPool) JoinConn(key interface{}, c *Conn) bool {
 	if c == nil || key == nil {
 		return false
 	}
@@ -43,7 +43,7 @@ func JoinConn(key interface{}, c *Conn) bool {
 }
 
 // ExistConn
-func ExistConn(key interface{}) bool {
+func (pool *ConnPool) ExistConn(key interface{}) bool {
 	p := GetConnPool()
 	p.RLock()
 	defer p.RUnlock()
@@ -52,7 +52,7 @@ func ExistConn(key interface{}) bool {
 }
 
 // DeleteConn delete connections by key ,such as userID
-func DeleteConn(key interface{}) (*Conn, bool) {
+func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
 	p := GetConnPool()
 	p.Lock()
 	i, ok := p.items[key]
@@ -65,7 +65,7 @@ func DeleteConn(key interface{}) (*Conn, bool) {
 }
 
 // ConnCount Get connections count
-func ConnCount() int {
+func (pool *ConnPool) ConnCount() int {
 	p := GetConnPool()
 	p.RLock()
 	defer p.RUnlock()
