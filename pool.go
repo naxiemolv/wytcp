@@ -19,7 +19,7 @@ type Item struct {
 }
 
 // ConnPool connection pool
-func GetConnPool() *ConnPool {
+func Pool() *ConnPool {
 
 	if pool == nil {
 		pool = &ConnPool{
@@ -34,7 +34,7 @@ func (pool *ConnPool) GetConn(key interface{}) (*Conn, bool) {
 	if key == nil {
 		return nil, false
 	}
-	p := GetConnPool()
+	p := Pool()
 	p.RLock()
 	i, ok := p.items[key]
 	p.RUnlock()
@@ -46,7 +46,7 @@ func (pool *ConnPool) JoinConn(key interface{}, c *Conn) bool {
 	if c == nil || key == nil {
 		return false
 	}
-	p := GetConnPool()
+	p := Pool()
 	i := &Item{key: key, conn: c}
 	p.Lock()
 	p.items[key] = i
@@ -56,7 +56,7 @@ func (pool *ConnPool) JoinConn(key interface{}, c *Conn) bool {
 
 // ExistConn
 func (pool *ConnPool) ExistConn(key interface{}) bool {
-	p := GetConnPool()
+	p := Pool()
 	p.RLock()
 	defer p.RUnlock()
 	_, ok := p.items[key]
@@ -65,7 +65,7 @@ func (pool *ConnPool) ExistConn(key interface{}) bool {
 
 // DeleteConn delete connections by key ,such as userID
 func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
-	p := GetConnPool()
+	p := Pool()
 	p.Lock()
 	i, ok := p.items[key]
 	if !ok {
@@ -78,7 +78,7 @@ func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
 
 // ConnCount Get connections count
 func (pool *ConnPool) ConnCount() int {
-	p := GetConnPool()
+	p := Pool()
 	p.RLock()
 	defer p.RUnlock()
 	return len(p.items)
