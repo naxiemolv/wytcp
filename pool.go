@@ -30,7 +30,7 @@ func GetConnPool() *ConnPool {
 	return pool
 }
 
-func (pool *ConnPool) Conn(key interface{}) (*Conn, bool) {
+func (pool *ConnPool) GetConn(key interface{}) (*Conn, bool) {
 	if key == nil {
 		return nil, false
 	}
