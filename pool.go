@@ -30,6 +30,18 @@ func GetConnPool() *ConnPool {
 	return pool
 }
 
+func (pool *ConnPool) Conn(key interface{}) (*Conn, bool) {
+	if key == nil {
+		return nil, false
+	}
+	p := GetConnPool()
+	p.RLock()
+	i, ok := p.items[key]
+	p.RUnlock()
+
+	return i.conn, ok
+}
+
 func (pool *ConnPool) JoinConn(key interface{}, c *Conn) bool {
 	if c == nil || key == nil {
 		return false
