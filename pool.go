@@ -74,6 +74,24 @@ func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
 	return i.conn, ok
 }
 
+func (pool *ConnPool) QuitConn(key interface{}, conn *Conn) (bool) {
+	pool.Lock()
+
+	i, ok := pool.items[key]
+	if !ok {
+		pool.Unlock()
+		return false
+	}
+	if i.conn.RawConn != conn.RawConn {
+		pool.Unlock()
+		return false
+	}
+
+	delete(pool.items, key)
+	pool.Unlock()
+	return true
+}
+
 // ConnCount Get connections count
 func (pool *ConnPool) ConnCount() int {
 
