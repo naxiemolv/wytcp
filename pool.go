@@ -12,7 +12,6 @@ type ConnPool struct {
 }
 
 type Item struct {
-	sync.RWMutex
 	key  interface{}
 	conn *Conn
 }
@@ -67,6 +66,7 @@ func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
 	pool.Lock()
 	i, ok := pool.items[key]
 	if !ok {
+		pool.Unlock()
 		return nil, false
 	}
 	delete(pool.items, key)
@@ -78,6 +78,8 @@ func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
 func (pool *ConnPool) ConnCount() int {
 
 	pool.RLock()
-	defer pool.RUnlock()
-	return len(pool.items)
+	count := len(pool.items)
+	pool.RUnlock()
+
+	return count
 }
