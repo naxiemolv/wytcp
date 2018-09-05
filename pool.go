@@ -13,7 +13,7 @@ type ConnPool struct {
 
 type Item struct {
 	key  interface{}
-	conn *Conn
+	conn interface{}
 }
 
 // ConnPool connection pool
@@ -24,7 +24,7 @@ func NewPool() *ConnPool {
 	}
 }
 
-func (pool *ConnPool) GetConn(key interface{}) (*Conn, bool) {
+func (pool *ConnPool) GetConn(key interface{}) (interface{}, bool) {
 	if key == nil {
 		return nil, false
 	}
@@ -38,7 +38,7 @@ func (pool *ConnPool) GetConn(key interface{}) (*Conn, bool) {
 	return nil, false
 }
 
-func (pool *ConnPool) JoinConn(key interface{}, c *Conn) bool {
+func (pool *ConnPool) JoinConn(key interface{}, c interface{}) bool {
 	if c == nil || key == nil {
 		return false
 	}
@@ -61,7 +61,7 @@ func (pool *ConnPool) ExistConn(key interface{}) bool {
 }
 
 // DeleteConn delete connections by key ,such as userID
-func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
+func (pool *ConnPool) DeleteConn(key interface{}) (interface{}, bool) {
 
 	pool.Lock()
 	i, ok := pool.items[key]
@@ -74,21 +74,21 @@ func (pool *ConnPool) DeleteConn(key interface{}) (*Conn, bool) {
 	return i.conn, ok
 }
 
-func (pool *ConnPool) QuitConn(key interface{}, conn *Conn) (bool) {
+func (pool *ConnPool) QuitConn(key interface{}, conn interface{}) (bool) {
 	pool.Lock()
-
+	defer pool.Unlock()
 	i, ok := pool.items[key]
 	if !ok {
-		pool.Unlock()
+
 		return false
 	}
-	if i.conn.RawConn != conn.RawConn {
-		pool.Unlock()
+	if i.conn != conn {
+
 		return false
 	}
 
 	delete(pool.items, key)
-	pool.Unlock()
+
 	return true
 }
 
