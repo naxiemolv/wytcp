@@ -8,7 +8,7 @@ var mutex sync.RWMutex
 
 type ConnPool struct {
 	sync.RWMutex
-	items map[interface{}]*Item
+	Items map[interface{}]*Item
 }
 
 type Item struct {
@@ -20,7 +20,7 @@ type Item struct {
 func NewPool() *ConnPool {
 
 	return &ConnPool{
-		items: make(map[interface{}]*Item),
+		Items: make(map[interface{}]*Item),
 	}
 }
 
@@ -30,7 +30,7 @@ func (pool *ConnPool) GetConn(key interface{}) (interface{}, bool) {
 	}
 
 	pool.RLock()
-	i, ok := pool.items[key]
+	i, ok := pool.Items[key]
 	pool.RUnlock()
 	if ok {
 		return i.conn, true
@@ -45,7 +45,7 @@ func (pool *ConnPool) JoinConn(key interface{}, c interface{}) bool {
 
 	i := &Item{key: key, conn: c}
 	pool.Lock()
-	pool.items[key] = i
+	pool.Items[key] = i
 	pool.Unlock()
 	return true
 }
@@ -55,7 +55,7 @@ func (pool *ConnPool) ExistConn(key interface{}) bool {
 
 	pool.RLock()
 
-	_, ok := pool.items[key]
+	_, ok := pool.Items[key]
 	pool.RUnlock()
 	return ok
 }
@@ -64,12 +64,12 @@ func (pool *ConnPool) ExistConn(key interface{}) bool {
 func (pool *ConnPool) DeleteConn(key interface{}) (interface{}, bool) {
 
 	pool.Lock()
-	i, ok := pool.items[key]
+	i, ok := pool.Items[key]
 	if !ok {
 		pool.Unlock()
 		return nil, false
 	}
-	delete(pool.items, key)
+	delete(pool.Items, key)
 	pool.Unlock()
 	return i.conn, ok
 }
@@ -77,7 +77,7 @@ func (pool *ConnPool) DeleteConn(key interface{}) (interface{}, bool) {
 func (pool *ConnPool) QuitConn(key interface{}, conn interface{}) (bool) {
 	pool.Lock()
 	defer pool.Unlock()
-	i, ok := pool.items[key]
+	i, ok := pool.Items[key]
 	if !ok {
 
 		return false
@@ -87,7 +87,7 @@ func (pool *ConnPool) QuitConn(key interface{}, conn interface{}) (bool) {
 		return false
 	}
 
-	delete(pool.items, key)
+	delete(pool.Items, key)
 
 	return true
 }
@@ -96,7 +96,7 @@ func (pool *ConnPool) QuitConn(key interface{}, conn interface{}) (bool) {
 func (pool *ConnPool) ConnCount() int {
 
 	pool.RLock()
-	count := len(pool.items)
+	count := len(pool.Items)
 	pool.RUnlock()
 
 	return count
