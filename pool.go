@@ -18,7 +18,6 @@ type Item struct {
 
 // ConnPool connection pool
 func NewPool() *ConnPool {
-
 	return &ConnPool{
 		Items: make(map[interface{}]*Item),
 	}

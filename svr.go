@@ -1,17 +1,17 @@
 package wytcp
 
 import (
-	"net"
-	"fmt"
-	"time"
 	"errors"
+	"fmt"
+	"net"
+	"time"
 )
 
 type Conf struct {
-	Port         uint16
-	SendChanSize int
+	Port            uint16
+	SendChanSize    int
 	ReceiveChanSize int
-	AcceptTimeout time.Duration
+	AcceptTimeout   time.Duration
 }
 
 type Server struct {
@@ -25,7 +25,7 @@ type Server struct {
 // CreateTCPServer create a tcp server
 func CreateTCPServer(cfg *Conf, callback Callback, receiver Receiver) (*Server, error) {
 	if cfg == nil || callback == nil || receiver == nil {
-		return nil,errors.New("miss parameter")
+		return nil, errors.New("miss parameter")
 	}
 	s := &Server{
 		cfg:      cfg,
@@ -34,7 +34,7 @@ func CreateTCPServer(cfg *Conf, callback Callback, receiver Receiver) (*Server, 
 		exitChan: make(chan bool),
 	}
 	if cfg.Port == 0 {
-		return nil,errors.New("tcp server need to bind a port")
+		return nil, errors.New("tcp server need to bind a port")
 	}
 	addr, err := net.ResolveTCPAddr("tcp4", fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
@@ -42,7 +42,7 @@ func CreateTCPServer(cfg *Conf, callback Callback, receiver Receiver) (*Server, 
 	}
 	listener, err := net.ListenTCP("tcp", addr)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	s.listener = listener
 	return s, nil
@@ -51,9 +51,10 @@ func CreateTCPServer(cfg *Conf, callback Callback, receiver Receiver) (*Server, 
 func (s *Server) Start() {
 	defer func() {
 		s.listener.Close()
-	} ()
+	}()
 
 	for {
+
 		select {
 		case <-s.exitChan:
 			return
@@ -63,10 +64,11 @@ func (s *Server) Start() {
 			s.listener.SetDeadline(time.Now().Add(s.cfg.AcceptTimeout))
 		}
 		s.listener.SetDeadline(time.Now().Add(time.Second))
-		c ,err := s.listener.AcceptTCP()
+		c, err := s.listener.AcceptTCP()
 		if err != nil {
 			continue
 		}
-		joinConn(c,s)
+
+		joinConn(c, s)
 	}
 }

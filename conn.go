@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	ErrorTypeUnknow       = 0
+	ErrorTypeUnknown      = 0
 	ErrorTypeSendFailed   = -1
 	ErrorTypeHandleFailed = -2
 	ErrorTypeWriteFailed  = -3
@@ -25,14 +25,14 @@ var (
 type Conn struct {
 	server       *Server
 	RawConn      *net.TCPConn
-	SendCount    int64  // how many package sent during this connect
-	ReceiveCount int64  // how many package received during this connect
-	sendChan    chan DataPkg
-	receiveChan chan DataPkg
-	closeChan   chan bool
-	closeOnce   sync.Once
-	closeFlag   int32
-	userData    interface{}
+	SendCount    int64 // how many package sent during this connect
+	ReceiveCount int64 // how many package received during this connect
+	sendChan     chan DataPkg
+	receiveChan  chan DataPkg
+	closeChan    chan bool
+	closeOnce    sync.Once
+	closeFlag    int32
+	userData     interface{}
 }
 
 type Callback interface {
@@ -102,7 +102,6 @@ func (c *Conn) receiveLoop() {
 		case <-c.server.exitChan:
 			return
 		case <-c.closeChan:
-			fmt.Println("close chan")
 			return
 		default:
 		}
@@ -207,7 +206,7 @@ func (c *Conn) Write(d DataPkg, timeout time.Duration) error {
 }
 
 func runtimeError(e interface{}) {
-	fmt.Println(e)
+	fmt.Println("[wytcp] error:", e)
 }
 
 func (c *Conn) RemoteAddr() net.Addr {
