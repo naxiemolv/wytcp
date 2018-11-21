@@ -142,6 +142,10 @@ func gravelChannel(mess chan bool) {
 	close(mess)
 }
 
+func (c *Conn) SetMinHeartBeatTime(duration time.Duration) {
+	c.hbRequireItv = duration
+}
+
 func (c *Conn) handleLoop() {
 	defer func() {
 		if e := recover(); e != nil {
