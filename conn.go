@@ -32,6 +32,7 @@ type Conn struct {
 	closeChan    chan bool
 	closeOnce    sync.Once
 	closeFlag    int32
+	hbRequireItv time.Duration
 	userData     interface{}
 }
 
@@ -62,6 +63,7 @@ func joinConn(conn *net.TCPConn, server *Server) {
 		sendChan:     make(chan DataPkg, server.cfg.SendChanSize),
 		receiveChan:  make(chan DataPkg, server.cfg.ReceiveChanSize),
 		closeChan:    make(chan bool),
+		hbRequireItv: server.cfg.HeartBeatCheckItv,
 	}
 	go func() {
 		if c.server.callback.Connect(c) {
@@ -107,6 +109,11 @@ func (c *Conn) receiveLoop() {
 		}
 
 		d, err := c.server.receiver.Deserialization(c)
+		if c.hbRequireItv > 0 {
+			msg := make(chan bool)
+			go heartBeating(c.RawConn, msg, c.hbRequireItv)
+			go gravelChannel(msg)
+		}
 
 		if err != nil {
 			return
@@ -114,6 +121,25 @@ func (c *Conn) receiveLoop() {
 		c.receiveChan <- d
 		c.ReceiveCount++
 	}
+}
+
+func heartBeating(conn net.Conn, readerChannel chan bool, timeout time.Duration) {
+	select {
+	case fk := <-readerChannel:
+		if fk {
+			conn.SetDeadline(time.Now().Add(timeout))
+		}
+
+		break
+	case <-time.After(time.Second * 5):
+		conn.Close()
+	}
+
+}
+
+func gravelChannel(mess chan bool) {
+	mess <- true
+	close(mess)
 }
 
 func (c *Conn) handleLoop() {

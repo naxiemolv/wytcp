@@ -8,10 +8,11 @@ import (
 )
 
 type Conf struct {
-	Port            uint16
-	SendChanSize    int
-	ReceiveChanSize int
-	AcceptTimeout   time.Duration
+	Port              uint16
+	SendChanSize      int
+	ReceiveChanSize   int
+	AcceptTimeout     time.Duration
+	HeartBeatCheckItv time.Duration
 }
 
 type Server struct {
